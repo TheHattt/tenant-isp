@@ -18,7 +18,8 @@ return new class extends Migration {
                 ->constrained()
                 ->cascadeOnDelete();
             $table->string("name");
-            $table->string("email")->nullable();
+            $table->string("email")->unique();
+            $table->string("phone")->nullable();
             $table->timestamps();
         });
     }

@@ -12,8 +12,10 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        $customers = Customer::all();
-        return view("customers.index", [
+        $customers = Customer::where("tenant_id", auth()->user()->tenant_id)
+            ->latest()
+            ->paginate(10);
+        return view("components.customers.index", [
             "customers" => $customers,
         ]);
     }
