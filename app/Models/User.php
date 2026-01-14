@@ -2,38 +2,21 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Builder;
 use App\Models\Tenant;
-use App\Models\Scopes\TenantScope;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = ["name", "email", "password", "tenant_id"];
-
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = ["password", "remember_token"];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -47,8 +30,26 @@ class User extends Authenticatable
         return $this->belongsTo(Tenant::class);
     }
 
-    public static function boot()
+    protected static function booted()
     {
-        static::addGlobalScope(new TenantScope());
+        // add filters that apply to all queries
+        // automatically apply the tenant scope to all queries
+        static::addGlobalScope("tenant", function (Builder $builder) {
+            // Safely check if the application is running in the console
+            if (app()->runningInConsole()) {
+                return;
+            }
+
+            // get the authenticated service
+            $auth = app("auth");
+            // check if there is a logged in user
+            if ($auth->hasUser() && ($user = $auth->user())) {
+                // check if tenant_id === to the logged in user's tenant_id
+                if ($tenantId = $user->tenant_id) {
+                    // filter for a specific tenant : belongs to company A not B -> use tenant_id
+                    $builder->where("tenant_id", $tenantId);
+                }
+            }
+        });
     }
 }
