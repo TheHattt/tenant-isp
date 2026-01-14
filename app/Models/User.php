@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\Tenant;
+use App\Models\Scopes\TenantScope;
 
 class User extends Authenticatable
 {
@@ -44,5 +45,10 @@ class User extends Authenticatable
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
+    }
+
+    public static function boot()
+    {
+        static::addGlobalScope(new TenantScope());
     }
 }
