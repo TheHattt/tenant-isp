@@ -12,7 +12,10 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        //
+        $customers = Customer::all();
+        return view("customers.index", [
+            "customers" => $customers,
+        ]);
     }
 
     /**
@@ -20,7 +23,7 @@ class CustomerController extends Controller
      */
     public function create()
     {
-        //
+        return view("customers.create");
     }
 
     /**
@@ -28,7 +31,17 @@ class CustomerController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // validate data from the request
+        $validated = $request->validate([
+            "name" => "required|string|max:80",
+            "email" => "required|email|nullable|max:80|unique:customers,email",
+        ]);
+
+        // create a new customer
+        $customer = Customer::create($validated);
+
+        // redirect to the customer index page
+        return redirect()->route("customers.index");
     }
 
     /**
