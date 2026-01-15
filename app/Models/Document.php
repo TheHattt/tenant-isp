@@ -6,7 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Document extends Model
 {
-    protected $fillable = ["customer_id", "file_type", "file_path"];
+    protected $fillable = [
+        "customer_id",
+        "original_name",
+        "file_type",
+        "file_path",
+    ];
 
     public function customer()
     {
