@@ -16,6 +16,11 @@ class Customer extends Model
         return $this->belongsTo(Tenant::class);
     }
 
+    public function notes()
+    {
+        return $this->hasMany(Note::class);
+    }
+
     protected static function booted()
     {
         static::addGlobalScope(new TenantScope());

@@ -1,8 +1,9 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\NoteController;
+use Illuminate\Support\Facades\Route;
 
 Route::get("/", function () {
     return view("welcome");
@@ -15,6 +16,7 @@ Route::get("/dashboard", function () {
     ->name("dashboard");
 
 Route::middleware("auth")->group(function () {
+    // Profile Routes
     Route::get("/profile", [ProfileController::class, "edit"])->name(
         "profile.edit",
     );
@@ -24,18 +26,21 @@ Route::middleware("auth")->group(function () {
     Route::delete("/profile", [ProfileController::class, "destroy"])->name(
         "profile.destroy",
     );
-});
 
-Route::middleware("auth")->group(function () {
-    Route::resource("/customers", CustomerController::class)->only([
-        "index",
-        "create",
+    // Customer Resource
+    Route::resource("customers", CustomerController::class);
+
+    // --- FIX FOR NOTES ---
+    // This defines the specific nested route your Blade file is calling
+    Route::post("/customers/{customer}/notes", [
+        NoteController::class,
         "store",
-        "show",
-        "edit",
-        "update",
-        "destroy",
-    ]);
+    ])->name("customers.notes.store");
+
+    // Keep this if you want to allow direct deletion of notes by ID
+    Route::delete("/notes/{note}", [NoteController::class, "destroy"])->name(
+        "notes.destroy",
+    );
 });
 
 require __DIR__ . "/auth.php";
