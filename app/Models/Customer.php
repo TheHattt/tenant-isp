@@ -25,4 +25,9 @@ class Customer extends Model
     {
         static::addGlobalScope(new TenantScope());
     }
+
+    public function documents()
+    {
+        return $this->hasMany(Document::class);
+    }
 }
