@@ -3,17 +3,22 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Document extends Model
 {
+    // These fields MUST be listed here to allow saving to the DB
     protected $fillable = [
         "customer_id",
         "original_name",
-        "file_type",
         "file_path",
+        "file_type",
     ];
 
-    public function customer()
+    /**
+     * Get the customer that owns the document.
+     */
+    public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }

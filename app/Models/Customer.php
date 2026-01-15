@@ -9,7 +9,7 @@ use App\Models\Scopes\TenantScope;
 
 class Customer extends Model
 {
-    protected $fillable = ["tenant_id", "name", "email", "phone"];
+    protected $fillable = ["tenant_id", "name", "email", "phone", "avatar"];
 
     public function tenant(): BelongsTo
     {

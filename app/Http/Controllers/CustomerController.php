@@ -67,34 +67,32 @@ class CustomerController extends Controller
     {
         return view("components.customers.edit", compact("customer"));
     }
-
     public function update(Request $request, Customer $customer)
     {
-        $validated = $request->validate([
-            "name" => "required|string|max:80",
-            "phone" => "required|numeric",
-            "email" => [
-                "required",
-                "email",
-                "max:80",
-                Rule::unique("customers")
-                    ->ignore($customer->id) // 🔑 Fix: Prevents error when email isn't changed
-                    ->where(
-                        fn($q) => $q->where(
-                            "tenant_id",
-                            auth()->user()->tenant_id,
-                        ),
-                    ),
-            ],
+        $data = $request->validate([
+            "name" => "required|string|max:255",
+            "email" => "required|email|unique:customers,email," . $customer->id,
+            "phone" => "nullable|string",
+            "avatar" => "nullable|image|mimes:jpg,jpeg,png|max:2048", // 2MB limit
         ]);
 
-        $customer->update($validated);
+        if ($request->hasFile("avatar")) {
+            // Optional: Delete old avatar if it exists to save space
+            if ($customer->avatar) {
+                \Storage::disk("public")->delete($customer->avatar);
+            }
+
+            $data["avatar"] = $request
+                ->file("avatar")
+                ->store("avatars", "public");
+        }
+
+        $customer->update($data);
 
         return redirect()
-            ->route("customers.index")
-            ->with("success", "Customer updated.");
+            ->route("customers.show", $customer)
+            ->with("success", "Profile updated!");
     }
-
     public function destroy(Customer $customer)
     {
         $customer->delete();
