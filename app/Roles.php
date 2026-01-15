@@ -14,7 +14,7 @@ enum Roles: string
     case TECHNICIAN_MANAGER = "technician_manager";
 
     // who can manage customers
-    public static function canManageCustomers(User $user): array
+    public static function canManageCustomers(User $user): bool
     {
         return in_array($user->role, [
             self::ADMIN->value,
@@ -22,7 +22,7 @@ enum Roles: string
         ]);
     }
 
-    public static function canViewCustomers(User $user): array
+    public static function canViewCustomers(User $user): bool
     {
         return in_array($user->role, [
             self::ADMIN->value,

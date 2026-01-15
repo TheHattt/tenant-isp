@@ -4,7 +4,7 @@ namespace App\Policies;
 
 use App\Models\Customer;
 use App\Models\User;
-use App\Enums\Roles;
+use App\Roles;
 
 class CustomerPolicy
 {
@@ -13,7 +13,7 @@ class CustomerPolicy
      */
     public function viewAny(User $user): bool
     {
-        return in_array($user->role, Roles::canViewCustomers(), true);
+        return Roles::canViewCustomers($user);
     }
 
     /**
@@ -21,8 +21,11 @@ class CustomerPolicy
      */
     public function view(User $user, Customer $customer): bool
     {
-        return $user->tenant_id === $customer->tenant_id &&
-            in_array($user->role, Roles::canViewCustomers(), true);
+        // contrast tenant_id on the user's table is the same in the customer's table
+        if ($user->tenant_id !== $customer->tenant_id) {
+            return false;
+        }
+        return Roles::canViewCustomers($user);
     }
 
     /**
@@ -30,7 +33,7 @@ class CustomerPolicy
      */
     public function create(User $user): bool
     {
-        return in_array($user->role, Roles::canManageCustomers(), true);
+        return Roles::canManageCustomers($user);
     }
 
     /**
@@ -38,8 +41,10 @@ class CustomerPolicy
      */
     public function update(User $user, Customer $customer): bool
     {
-        return $user->tenant_id === $customer->tenant_id &&
-            in_array($user->role, Roles::canManageCustomers(), true);
+        if ($user->tenant_id !== $customer->tenant_id) {
+            return false;
+        }
+        return Roles::canManageCustomers($user);
     }
 
     /**
@@ -47,7 +52,9 @@ class CustomerPolicy
      */
     public function delete(User $user, Customer $customer): bool
     {
-        return $user->tenant_id === $customer->tenant_id &&
-            in_array($user->role, Roles::canManageCustomers(), true);
+        if ($user->tenant_id !== $customer->tenant_id) {
+            return false;
+        }
+        return Roles::canManageCustomers($user);
     }
 }

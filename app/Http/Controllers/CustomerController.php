@@ -3,30 +3,27 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class CustomerController extends Controller
 {
-    use AuthorizesRequests;
-
     public function __construct()
     {
-        $this->authorizeResource(Customer::class, 'customer');
+        $this->authorizeResource(Customer::class, "customer");
     }
-    
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
         $user = Auth::user();
-        $customers = Customer::where('tenant_id', $user->tenant_id)->latest()->paginate(10);
-        return view("components.customers.index", 
-       compact("customers") 
-        );
+        $customers = Customer::where("tenant_id", $user->tenant_id)
+            ->latest()
+            ->paginate(10);
+        return view("components.customers.index", compact("customers"));
     }
 
     /**
@@ -34,7 +31,6 @@ class CustomerController extends Controller
      */
     public function create()
     {
-
         return view("components.customers.create");
     }
 
@@ -48,16 +44,15 @@ class CustomerController extends Controller
         $validated = $request->validate([
             "name" => "required|string|max:80",
             "email" => "required|email|nullable|max:80|",
-            Rule::unique('customers')
-            ->where(function($query) use ($user){
+            Rule::unique("customers")->where(function ($query) use ($user) {
                 return $query->where("tenant_id", $user->tenant_id);
             }),
-            "phone" => "required|numeric"
+            "phone" => "required|numeric",
         ]);
 
         Customer::create([
             ...$validated,
-            'tenant_id' => $request->user()->tenant_id,
+            "tenant_id" => $request->user()->tenant_id,
         ]);
 
         return redirect()->route("customers.index");
@@ -68,7 +63,7 @@ class CustomerController extends Controller
      */
     public function show(Customer $customer)
     {
-       return view("components.customers.index", compact("customer")); 
+        return view("components.customers.show", compact("customer"));
     }
 
     /**
@@ -76,8 +71,7 @@ class CustomerController extends Controller
      */
     public function edit(Customer $customer)
     {
-        return view("components.customers.edit", compact('customer'));
-
+        return view("components.customers.edit", compact("customer"));
     }
 
     /**
@@ -85,23 +79,20 @@ class CustomerController extends Controller
      */
     public function update(Request $request, Customer $customer)
     {
-         $user = Auth::user();
+        $user = Auth::user();
         // validate data from the request
         $validated = $request->validate([
             "name" => "required|string|max:80",
             "email" => "required|email|nullable|max:80|",
-            Rule::unique('customers')
-            ->where(function($query) use ($user){
+            Rule::unique("customers")->where(function ($query) use ($user) {
                 return $query->where("tenant_id", $user->tenant_id);
             }),
-            "phone" => "required|numeric"
+            "phone" => "required|numeric",
         ]);
 
         $customer->update($validated);
 
-        return redirect('components.customers.index');
-
-       
+        return redirect()->route("customers.index");
     }
 
     /**
@@ -109,8 +100,8 @@ class CustomerController extends Controller
      */
     public function destroy(Customer $customer)
     {
-       $customer->delete();
-       
-       return redirect('components.customers.index');
+        $customer->delete();
+
+        return redirect()->route("customers.index");
     }
 }
