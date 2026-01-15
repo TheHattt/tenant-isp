@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\NoteController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DocumentController;
 
 Route::get("/", function () {
     return view("welcome");
@@ -41,6 +42,11 @@ Route::middleware("auth")->group(function () {
     Route::delete("/notes/{note}", [NoteController::class, "destroy"])->name(
         "notes.destroy",
     );
+});
+
+Route::middleware("auth")->group(function () {
+    // Document Resource
+    Route::resource("customers.documents", DocumentController::class);
 });
 
 require __DIR__ . "/auth.php";
