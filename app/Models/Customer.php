@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\Tenant;
 use App\Models\Scopes\TenantScope;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Project;
 
 class Customer extends Model
 {
@@ -26,8 +28,13 @@ class Customer extends Model
         static::addGlobalScope(new TenantScope());
     }
 
-    public function documents()
+    public function documents(): HasMany
     {
         return $this->hasMany(Document::class);
+    }
+
+    public function projects(): HasMany
+    {
+        return $this->hasMany(Project::class);
     }
 }

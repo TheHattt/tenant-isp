@@ -73,25 +73,27 @@ class CustomerController extends Controller
             "name" => "required|string|max:255",
             "email" => "required|email|unique:customers,email," . $customer->id,
             "phone" => "nullable|string",
-            "avatar" => "nullable|image|mimes:jpg,jpeg,png|max:2048", // 2MB limit
+            "avatar" => "nullable|image|mimes:jpg,jpeg,png|max:2048",
         ]);
 
         if ($request->hasFile("avatar")) {
-            // Optional: Delete old avatar if it exists to save space
+            // 1. Delete old one
             if ($customer->avatar) {
                 \Storage::disk("public")->delete($customer->avatar);
             }
 
-            $data["avatar"] = $request
-                ->file("avatar")
-                ->store("avatars", "public");
+            // 2. Store new one and UPDATE the data array
+            $path = $request->file("avatar")->store("avatars", "public");
+            $data["avatar"] = $path; // This line is critical!
         }
 
+        // 3. Perform the update
         $customer->update($data);
 
+        // 4. Force a clean redirect to prevent "double-click" syndrome
         return redirect()
-            ->route("customers.show", $customer)
-            ->with("success", "Profile updated!");
+            ->route("customers.index", $customer)
+            ->with("success", "Updated!");
     }
     public function destroy(Customer $customer)
     {
