@@ -1,88 +1,89 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Customers') }}
-        </h2>
-    </x-slot>
+    <div class="py-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-8">
-        <h1 class="text-2xl font-bold text-gray-700">
-            Welcome back, {{ Auth::user()->name }}
-        </h1>
-    </div>
-
-    <div class="py-4">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-
-            {{-- Success Alert --}}
-            @if(session('success'))
-                <div x-data="{ show: true }"
-                     x-show="show"
-                     x-init="setTimeout(() => show = false, 3000)"
-                     class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 shadow-sm flex justify-between">
-                    <span>{{ session('success') }}</span>
-                    <button @click="show = false">&times;</button>
+            {{-- Header: Pure White & Orange --}}
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+                <div>
+                    <h1 class="text-3xl font-black text-slate-900 tracking-tight">
+                        Customer Directory
+                    </h1>
+                    <p class="text-sm font-bold text-slate-400 mt-1">
+                        Total Clients: <span class="text-orange-500">{{ $customers->count() }}</span>
+                    </p>
                 </div>
-            @endif
 
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
                 @can('create', App\Models\Customer::class)
-                    <a href="{{ route('customers.create') }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 transition ease-in-out duration-150 shadow-sm">
+                    <a href="{{ route('customers.create') }}" class="inline-flex items-center px-6 py-3 bg-orange-500 rounded-2xl font-black text-[11px] text-white uppercase tracking-widest hover:bg-orange-600 transition shadow-lg shadow-orange-100">
+                        <svg class="w-4 h-4 mr-2 stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
                         Add Customer
                     </a>
                 @endcan
+            </div>
 
-                <form action="{{ route('customers.index') }}" method="GET" class="flex-1 max-w-md">
-                    <div class="relative">
+            {{-- Search: Simple & White --}}
+            <div class="mb-6">
+                <form action="{{ route('customers.index') }}" method="GET" class="max-w-md">
+                    <div class="relative group">
                         <input
                             type="text"
                             name="filter[search]"
                             value="{{ request('filter.search') }}"
-                            placeholder="Search name, email or phone..."
-                            class="w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                            placeholder="Search directory..."
+                            class="w-full bg-white border border-slate-200 rounded-2xl py-3 pl-11 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all placeholder-slate-300"
                         >
-                        @if(request()->filled('filter.search'))
-                            <a href="{{ route('customers.index') }}" class="absolute right-3 top-2 text-gray-400 hover:text-gray-600 text-xl">
-                                &times;
-                            </a>
-                        @endif
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <svg class="w-4 h-4 text-slate-300 group-focus-within:text-orange-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        </div>
                     </div>
                 </form>
             </div>
 
-            {{-- Table Container --}}
-            <div class="bg-white shadow overflow-hidden sm:rounded-lg border border-gray-200">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-                            <th scope="col" class="relative px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            {{-- Table: Clean White with Orange Accents --}}
+            <div class="bg-white rounded-[24px] border border-slate-100 shadow-sm overflow-hidden">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="border-b border-slate-50">
+                            <th class="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Customer</th>
+                            <th class="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Contact</th>
+                            <th class="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
+                    <tbody class="divide-y divide-slate-50">
                         @forelse($customers as $customer)
-                            <tr class="hover:bg-gray-50 transition duration-150 ease-in-out">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600">
-                                    <a href="{{ route('customers.show', $customer) }}" class="hover:underline">{{ $customer->name }}</a>
+                            <tr class="hover:bg-orange-50/30 transition-colors">
+                                <td class="px-8 py-5">
+                                    <div class="flex items-center gap-4">
+                                        <div class="h-10 w-10 bg-orange-100 rounded-xl flex items-center justify-center text-orange-600 font-black text-xs">
+                                            {{ strtoupper(substr($customer->name, 0, 1)) }}
+                                        </div>
+                                        <div>
+                                            <a href="{{ route('customers.show', $customer) }}" class="text-sm font-black text-slate-900 hover:text-orange-500 transition-colors">
+                                                {{ $customer->name }}
+                                            </a>
+                                            <div class="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-tighter">Client Profile</div>
+                                        </div>
+                                    </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $customer->email ?? '-' }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $customer->phone ?? '-' }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <div class="flex justify-end gap-4">
+                                <td class="px-8 py-5">
+                                    <div class="text-sm font-bold text-slate-600">{{ $customer->email }}</div>
+                                    <div class="text-[10px] font-black text-slate-300 mt-1">{{ $customer->phone ?? 'NO PHONE' }}</div>
+                                </td>
+                                <td class="px-8 py-5 text-right">
+                                    <div class="flex justify-end items-center gap-3">
+                                        {{-- Actions are Back and Visible --}}
                                         @can('update', $customer)
-                                            <a href="{{ route('customers.edit', $customer) }}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
+                                            <a href="{{ route('customers.edit', $customer) }}" class="p-2 text-slate-300 hover:text-orange-500 transition-colors">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                            </a>
                                         @endcan
 
                                         @can('delete', $customer)
                                             <button
                                                 type="button"
-                                                x-data=""
-                                                x-on:click.prevent="$dispatch('open-modal', 'confirm-customer-deletion'); $dispatch('set-deletion-target', { action: '{{ route('customers.destroy', $customer) }}', name: '{{ $customer->name }}' })"
-                                                class="text-red-600 hover:text-red-900"
-                                            >
-                                                Delete
+                                                @click="$dispatch('open-modal', 'confirm-customer-deletion'); $dispatch('set-deletion-target', { action: '{{ route('customers.destroy', $customer) }}', name: '{{ $customer->name }}' })"
+                                                class="p-2 text-slate-300 hover:text-red-500 transition-colors">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                             </button>
                                         @endcan
                                     </div>
@@ -90,8 +91,8 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="px-6 py-10 text-center text-gray-500 italic">
-                                    No customers found matching your criteria.
+                                <td colspan="3" class="px-8 py-20 text-center">
+                                    <p class="text-xs font-black text-slate-300 uppercase tracking-widest">No customers found</p>
                                 </td>
                             </tr>
                         @endforelse
@@ -99,7 +100,7 @@
                 </table>
 
                 @if($customers->hasPages())
-                    <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+                    <div class="px-8 py-4 bg-slate-50 border-t border-slate-100">
                         {{ $customers->links() }}
                     </div>
                 @endif
@@ -107,34 +108,17 @@
         </div>
     </div>
 
-    {{-- Delete Confirmation Modal --}}
+    {{-- Simplified Deletion Modal --}}
     <x-modal name="confirm-customer-deletion" focusable>
-        <div
-            x-data="{ action: '', name: '' }"
-            x-on:set-deletion-target.window="action = $event.detail.action; name = $event.detail.name"
-            class="p-6"
-        >
-            <h2 class="text-lg font-medium text-gray-900">
-                Are you sure you want to delete <span x-text="name" class="font-bold text-red-600"></span>?
-            </h2>
+        <div x-data="{ action: '', name: '' }" x-on:set-deletion-target.window="action = $event.detail.action; name = $event.detail.name" class="p-8">
+            <h2 class="text-xl font-black text-slate-900">Delete <span x-text="name" class="text-orange-500"></span>?</h2>
+            <p class="mt-2 text-sm font-bold text-slate-400">This action is permanent and cannot be undone.</p>
 
-            <p class="mt-3 text-sm text-gray-600 leading-relaxed">
-                This action cannot be undone. All data associated with this customer will be permanently removed from our servers.
-            </p>
-
-            <form method="post" :action="action" class="mt-6 flex justify-end gap-3">
-                @csrf
-                @method('delete')
-
-                <x-secondary-button x-on:click="$dispatch('close')">
-                    {{ __('Cancel') }}
-                </x-secondary-button>
-
-                <x-danger-button>
-                    {{ __('Delete Customer') }}
-                </x-danger-button>
+            <form method="post" :action="action" class="mt-8 flex justify-end gap-3">
+                @csrf @method('delete')
+                <button type="button" x-on:click="$dispatch('close')" class="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600">Cancel</button>
+                <button type="submit" class="px-6 py-3 bg-red-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-600 transition shadow-lg shadow-red-100">Delete Profile</button>
             </form>
         </div>
     </x-modal>
-
 </x-app-layout>
