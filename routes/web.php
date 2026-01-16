@@ -5,6 +5,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\NoteController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\ProjectController;
 
 Route::get("/", function () {
     return view("welcome");
@@ -27,6 +28,9 @@ Route::middleware("auth")->group(function () {
     Route::delete("/profile", [ProfileController::class, "destroy"])->name(
         "profile.destroy",
     );
+
+    // Project Resource
+    Route::resource("projects", ProjectController::class);
 
     // Customer Resource
     Route::resource("customers", CustomerController::class);

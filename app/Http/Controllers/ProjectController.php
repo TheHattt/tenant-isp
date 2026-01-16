@@ -52,7 +52,7 @@ class ProjectController extends Controller
      */
     public function show(Project $project)
     {
-        //
+        return view("components.projects.show", compact("project"));
     }
 
     /**
@@ -60,7 +60,11 @@ class ProjectController extends Controller
      */
     public function edit(Project $project)
     {
-        //
+        $customers = Customer::orderBy("name")->get();
+        return view(
+            "components.projects.edit",
+            compact("project", "customers"),
+        );
     }
 
     /**
@@ -68,7 +72,20 @@ class ProjectController extends Controller
      */
     public function update(Request $request, Project $project)
     {
-        //
+        $validatedData = $request->validate([
+            "customer_id" => "required|exists:customers,id",
+            "name" => "required|string|max:80",
+            "description" => "nullable|string",
+            "status" => "required|string|max:50",
+            "priority" => "required|string|max:50",
+            "budget" => "required|numeric",
+        ]);
+
+        $project->update($validatedData);
+
+        return redirect()
+            ->route("projects.index")
+            ->with("success", "Project updated successfully.");
     }
 
     /**
@@ -76,6 +93,10 @@ class ProjectController extends Controller
      */
     public function destroy(Project $project)
     {
-        //
+        $project->delete();
+
+        return redirect()
+            ->route("projects.index")
+            ->with("success", "Project deleted successfully.");
     }
 }
