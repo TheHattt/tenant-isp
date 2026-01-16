@@ -16,8 +16,17 @@ return new class extends Migration {
             $table->foreignId("customer_id")->constrained()->cascadeOnDelete();
             $table->string("name");
             $table->string("description")->nullable();
-            $table->string("status");
+            $table
+                ->string("status", [
+                    "Planning",
+                    "In Progress",
+                    "Completed",
+                    "Cancelled",
+                    "On Hold",
+                ])
+                ->default("Planning");
             $table->string("priority");
+            $table->decimal("budget", 10, 2)->default(0.0);
             $table->string("assigned_to");
             $table->string("created_by");
             $table->string("updated_by");

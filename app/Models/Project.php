@@ -17,6 +17,7 @@ class Project extends Model
         "description",
         "status",
         "priority",
+        "budget",
         "assigned_to",
         "created_by",
         "updated_by",
