@@ -11,16 +11,12 @@ use Illuminate\Database\Eloquent\Model;
 class Project extends Model
 {
     protected $fillable = [
-        "tenant_id",
         "customer_id",
         "name",
         "description",
         "status",
         "priority",
         "budget",
-        "assigned_to",
-        "created_by",
-        "updated_by",
     ];
 
     public function customer(): BelongsTo

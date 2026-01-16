@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Project;
+use App\Models\Customer;
 use Illuminate\Http\Request;
 
 class ProjectController extends Controller
@@ -13,7 +14,7 @@ class ProjectController extends Controller
     public function index()
     {
         $projects = Project::with("customer")->latest()->paginate(10);
-        return view("projects.index", compact("projects"));
+        return view("components.projects.index", compact("projects"));
     }
 
     /**
@@ -21,7 +22,8 @@ class ProjectController extends Controller
      */
     public function create()
     {
-        //
+        $customers = Customer::orderBy("name")->get();
+        return view("components.projects.create", compact("customers"));
     }
 
     /**
@@ -29,7 +31,20 @@ class ProjectController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validatedData = $request->validate([
+            "customer_id" => "required|exists:customers,id",
+            "name" => "required|string|max:80",
+            "description" => "nullable|string",
+            "status" => "required|string|max:50",
+            "priority" => "required|string|max:50",
+            "budget" => "required|numeric",
+        ]);
+
+        $project = Project::create($validatedData);
+
+        return redirect()
+            ->route("projects.index")
+            ->with("success", "Project created successfully.");
     }
 
     /**
