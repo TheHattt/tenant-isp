@@ -26,6 +26,8 @@ return new class extends Migration {
                 ])
                 ->default("Planning");
             $table->string("priority");
+            $table->date("start_date")->after("priority")->nullable();
+            $table->date("end_date")->after("start_date")->nullable();
             $table->decimal("budget", 10, 2)->default(0.0);
             $table->string("assigned_to");
             $table->string("created_by");

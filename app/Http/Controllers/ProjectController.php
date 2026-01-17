@@ -5,98 +5,125 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ProjectController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        $projects = Project::with("customer")->latest()->paginate(10);
+        $projects = Project::where("tenant_id", Auth::user()->tenant_id)
+            ->with("customer")
+            ->when($request->input("filter.search"), function (
+                $query,
+                $search,
+            ) {
+                $query
+                    ->where("name", "like", "%{$search}%")
+                    ->orWhereHas("customer", function ($q) use ($search) {
+                        $q->where("name", "like", "%{$search}%");
+                    });
+            })
+            ->latest()
+            ->paginate(6)
+            ->withQueryString();
+
         return view("components.projects.index", compact("projects"));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        $customers = Customer::orderBy("name")->get();
+        $customers = Customer::where("tenant_id", Auth::user()->tenant_id)
+            ->orderBy("name")
+            ->get();
+
         return view("components.projects.create", compact("customers"));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
+        $validated = $request->validate([
             "customer_id" => "required|exists:customers,id",
             "name" => "required|string|max:80",
             "description" => "nullable|string",
-            "status" => "required|string|max:50",
-            "priority" => "required|string|max:50",
-            "budget" => "required|numeric",
+            "priority" => "required|string",
+            "status" =>
+                "required|in:planning,in_progress,completed,on_hold,cancelled",
+            "budget" => "nullable|numeric",
+            "start_date" => "required|date",
+            "end_date" => "required|date|after_or_equal:start_date",
         ]);
 
-        $project = Project::create($validatedData);
+        Project::create(
+            array_merge($validated, [
+                "tenant_id" => auth()->user()->tenant_id,
+                "created_by" => auth()->id(),
+                "updated_by" => auth()->id(),
+                "assigned_to" => auth()->id(), // Temporary placeholder until you add user selection
+            ]),
+        );
 
         return redirect()
             ->route("projects.index")
-            ->with("success", "Project created successfully.");
+            ->with("success", "Project created successfully!");
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Project $project)
-    {
-        return view("components.projects.show", compact("project"));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Project $project)
     {
-        $customers = Customer::orderBy("name")->get();
+        if ($project->tenant_id !== Auth::user()->tenant_id) {
+            abort(403);
+        }
+
+        $customers = Customer::where("tenant_id", Auth::user()->tenant_id)
+            ->orderBy("name")
+            ->get();
+
         return view(
             "components.projects.edit",
             compact("project", "customers"),
         );
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Project $project)
     {
+        // 1. Security Check
+        if ($project->tenant_id !== Auth::user()->tenant_id) {
+            abort(403);
+        }
+
+        // 2. Validation
         $validatedData = $request->validate([
             "customer_id" => "required|exists:customers,id",
             "name" => "required|string|max:80",
             "description" => "nullable|string",
-            "status" => "required|string|max:50",
-            "priority" => "required|string|max:50",
-            "budget" => "required|numeric",
+            "status" =>
+                "required|in:planning,in_progress,completed,on_hold,cancelled",
+            "priority" => "required|string",
+            "budget" => "nullable|numeric",
+            "start_date" => "required|date",
+            "end_date" => "required|date|after_or_equal:start_date",
         ]);
 
-        $project->update($validatedData);
+        // 3. Update execution
+        $project->update(
+            array_merge($validatedData, [
+                "updated_by" => auth()->id(),
+            ]),
+        );
 
+        // 4. Redirect
         return redirect()
             ->route("projects.index")
             ->with("success", "Project updated successfully.");
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Project $project)
     {
+        if ($project->tenant_id !== Auth::user()->tenant_id) {
+            abort(403);
+        }
         $project->delete();
-
         return redirect()
             ->route("projects.index")
-            ->with("success", "Project deleted successfully.");
+            ->with("success", "Project purged.");
     }
 }
