@@ -11,7 +11,16 @@ class ProjectController extends Controller
 {
     public function index(Request $request)
     {
-        $projects = Project::where("tenant_id", Auth::user()->tenant_id)
+        $query = Project::where("tenant_id", Auth::user()->tenant_id);
+
+        // Get counts before pagination
+        $totalCount = $query->count();
+        $inProgressCount = (clone $query)
+            ->where("status", "in_progress")
+            ->count();
+        $highPriorityCount = (clone $query)->where("priority", "high")->count();
+
+        $projects = $query
             ->with("customer")
             ->when($request->input("filter.search"), function (
                 $query,
@@ -27,7 +36,22 @@ class ProjectController extends Controller
             ->paginate(6)
             ->withQueryString();
 
-        return view("components.projects.index", compact("projects"));
+        return view(
+            "components.projects.index",
+            compact(
+                "projects",
+                "totalCount",
+                "inProgressCount",
+                "highPriorityCount",
+            ),
+        );
+    }
+
+    public function show(Project $project)
+    {
+        // $this->authorize("view", $project);
+
+        return view("components.projects.show", compact("project"));
     }
 
     public function create()
@@ -36,7 +60,12 @@ class ProjectController extends Controller
             ->orderBy("name")
             ->get();
 
-        return view("components.projects.create", compact("customers"));
+        $project = new Project();
+
+        return view(
+            "components.projects.create",
+            compact("customers", "project"),
+        );
     }
 
     public function store(Request $request)

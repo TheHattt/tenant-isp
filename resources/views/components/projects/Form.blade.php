@@ -9,7 +9,7 @@
         <option value="">Select customer</option>
         @foreach($customers as $customer)
             <option value="{{ $customer->id }}"
-                @selected(old('customer_id', $project->customer_id ?? '') == $customer->id)>
+                @selected(old('customer_id', $projects->customer_id ?? '') == $customer->id)>
                 {{ $customer->name }}
             </option>
         @endforeach
